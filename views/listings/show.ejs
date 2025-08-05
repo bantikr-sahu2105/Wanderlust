@@ -1,0 +1,107 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World__Tour</title>
+</head> -->
+<% layout("/layouts/boilerplate") %>
+<body>
+    <div class="row">
+        <div class="col-8 offset-2">
+            <h2><b><%=onelisting.title %></b></h2>
+        </div>
+            <div class="card col-8 row-5 offset-2 show-card " >
+                
+                <img 
+                    src="<%=onelisting.image %>" 
+                    class="card-img-top show-img" 
+                    alt="Listing_Image"
+                    
+                />
+                <div class="card-body">
+                    <p class="card-text">
+                        <ul>
+                            <li>Owned_By:<b><i><%= onelisting.owner.username %></i></b></li>
+                            <li>Name of Palace : <b><%=onelisting.title %></b></li>
+                            <li>Description : <%=onelisting.description %></li>
+                            <li>Price : &#8377;<%=onelisting.price %>/per_night</li>
+                            <li>Location : <%=onelisting.location %></li>
+                            <li>Country : <%=onelisting.country %></li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+
+            <!-- <a href="/listings//edit">Edit the Listing</a> -->
+
+            <% if(currUser && currUser._id.equals(onelisting.owner._id)) {%>
+            <div class="btns">
+                <a 
+                    href="/listings/<%=onelisting._id%>/edit" 
+                    class="btn btn-danger col-1 offset-2">Edit</a>
+
+                <form method="POST" action="/listings/<%=onelisting._id%>?_method=DELETE">
+                    <button type="submit" class="btn btn-dark offset-6"> Delete</button>
+                </form>  
+            </div>
+            <% } %>
+
+            <% if(currUser){%>
+            <div class="col-8 offset-2 mb-2">
+                <br/>
+                <hr/>
+                <h4>Give a Review</h4>
+                <form action="/listings/<%= onelisting.id %>/reviews" method="POST" novalidate class="needs-validation">
+                    <div>
+                        <label for="rating" class="form-label">Rating</label>
+                        <input type="range" min="1" max="5" id="rating" name="review[rating]" class="form-control">
+                    </div>
+                    <fieldset class="starability-basic">
+  <legend>First rating:</legend>
+  <input type="radio" id="no-rate" class="input-no-rate" name="rating" value="0" checked aria-label="No rating." />
+  <input type="radio" id="first-rate1" name="rating" value="1" />
+  <label for="first-rate1" title="Terrible">1 star</label>
+  <input type="radio" id="first-rate2" name="rating" value="2" />
+  <label for="first-rate2" title="Not good">2 stars</label>
+  <input type="radio" id="first-rate3" name="rating" value="3" />
+  <label for="first-rate3" title="Average">3 stars</label>
+  <input type="radio" id="first-rate4" name="rating" value="4" />
+  <label for="first-rate4" title="Very good">4 stars</label>
+  <input type="radio" id="first-rate5" name="rating" value="5" />
+  <label for="first-rate5" title="Amazing">5 stars</label>
+</fieldset>
+                    <div>
+                        <label for="comment" class="form-label">Comments</label>
+                        <textarea name="review[comment]" id="comment" cols="30" rows="5"class="form-control" required></textarea>
+                        <div class="invalid-feedback">Please submit some comments.</div>
+                    </div>
+                    <br/>
+                    <button class="btn btn-outline-dark" type="submit">Submit</button>
+                </form>
+                <hr/>
+            </div>
+            <% } %>
+
+            
+            <div class="col-8 offset-2 ">
+                <h4><b>All Reviews!!</b></h4>
+                <br/>
+                <div class="row">
+                <% for(review of onelisting.reviews){ %>
+                <div class="card col-5 ms-2 listing-card">
+                    <div class="card-body ">
+                      <h5 class="card-title ms-2">@<%=review.author.username %></h5>
+                      <p class="card-text ms-2"> <%= review.comment %></p>
+                      <p class="card-text ms-2"> <%= review.rating %> stars</p>
+                    </div>
+                    <form class="mb-2" method="POST" action="/listings/<%=onelisting.id%>/reviews/<%=review.id%>?_method=DELETE">
+                        <button class="btn btn-sm btn-dark">Delete</button>
+                    </form>
+                </div>
+                <%}%>
+                </div>
+            </div>        
+    </div> 
+</body>
+<!-- </html> -->
