@@ -1,28 +1,24 @@
+require('dotenv').config()
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-//const Listing = require("./models/listing.js");
-//const rawdata = require("./init/data.js");
 const path = require("path");
-const methodOverride = require("method-override");//TO EDIT OR DELETE DATA FROM DB WITH HELP OF POST REQUEST
+const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
-//const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
-//const {listingSchema , reviewSchma} = require("./schema.js");
-//const Review = require("./models/review.js");
 const session = require("express-session");
+const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models_Schema/user.js");
-
 
 //ROUTES
 const listingRouter = require("./routes/listings.js");
 const reviewRouter = require("./routes/reviews.js");
 const userRouter = require("./routes/users.js");
 
-let Mongo_URL = "mongodb://127.0.0.1:27017/worldtour";
+const dbUrl = process.env.AtLASDB_URL;
 
 main()
     .then( (res) => {
@@ -34,18 +30,31 @@ main()
 
 
 async function main() {
-  await mongoose.connect(Mongo_URL);
+  await mongoose.connect(dbUrl);
 };
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname,"views"));
-app.use(express.urlencoded({ extended: true }));//TO RUN THE POST REQUESTS
-app.use(methodOverride("_method"));//TO UPDATE AND DELETE VIA POST REQUEST
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
 app.engine('ejs',ejsMate);
 app.use(express.static(path.join(__dirname,"/public")));
 
+const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    touchAfter: 24*60*60,
+    crypto: {
+        secret: process.env.SECRET,
+    }
+}); 
+
+store.on("error",() =>{
+    console.log("MONGO SESSION STORE ERROR!!");
+});
+
 const sessionOptions = { 
-    secret :"mysecretbaba",
+    store,
+    secret: process.env.SECRET,
     resave: false,
     saveUninitialized: true, 
     cookie : {
@@ -72,22 +81,6 @@ app.use((req,res,next) => {
     next();
 });
 
-// app.get("/demouser",async(req,res) =>{
-//     let fakeUser = new User({
-//         email:"alphabeta852@gmail.com",
-//         username:"Thor"
-//     });
-//     let registeredUser = await User.register(fakeUser,"helloworld");
-//     res.send(registeredUser);
-// });
-
-
-// ROOT
-app.get("/", (req,res) => {
-    res.send("This is root!!");
-});
-
-
 //For_all_listings_routes
 app.use("/listings", listingRouter);
 
@@ -96,31 +89,13 @@ app.use("/listings/:id/reviews",reviewRouter);
 
 app.use("/",userRouter);
 
-
-//NEW ROUTE
-// app.get("/testlisting",async (req,res) =>{
-//     let sample = new Listing({
-//         title:"Villa leopolda",
-//         description:"Best site to enjoy in vacations",
-//         price:2000,
-//         location : "Riviera",
-//         country:"French"
-//     });
-    
-//     await sample.save();
-//     console.log("Sample is saved in DB!");
-//     res.send("Testing Successful"); 
-// });
-
 app.all("*",(req,res,next) =>{
     next(new ExpressError(404,"Page Not found!!123"));
 })
 
 app.use((err,req,res,next) => {
-    // res.send("Something Went wrong!!");
     let { statusCode=500,message="Something went wrong!!"} = err;
     res.status(statusCode).render("error.ejs",{message});
-    //res.status(statusCode).send(message);
 })
 
 app.listen(8080, () =>{

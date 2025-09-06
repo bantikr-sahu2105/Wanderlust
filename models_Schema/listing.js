@@ -6,13 +6,8 @@ const listingSchema = new Schema( {
     title : String,
     description : String,
     image : {
-        type : String,
-        default : 
-            "https://cdn.pixabay.com/photo/2018/02/13/23/41/nature-3151869_960_720.jpg",
-        set: (v) => 
-            v === ""
-                ? "https://img.freepik.com/free-photo/sunset-time-tropical-beach-sea-with-coconut-palm-tree_74190-1075.jpg"
-                : v,
+        url: String,
+        filename: String,
     },
     price : Number,
     location : String,
@@ -27,6 +22,20 @@ const listingSchema = new Schema( {
         type: Schema.Types.ObjectId,
         ref:"User",
     },
+    category: {
+    type: String,
+    enum: [
+      "mountain",
+      "arctic",
+      "boats",
+      "beach",
+      "rooms",
+      "city",
+      "pools",
+      "camping",
+      "farms",
+    ],
+  },
 });
 
 listingSchema.post("findOneAndDelete" , async(list) => {
