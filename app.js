@@ -48,7 +48,7 @@ const store = MongoStore.create({
     }
 }); 
 
-store.on("error",() =>{
+store.on("error",(err) =>{
     console.log("MONGO SESSION STORE ERROR!!");
 });
 
@@ -56,11 +56,11 @@ const sessionOptions = {
     store,
     secret: process.env.SECRET,
     resave: false,
-    saveUninitialized: true, 
+    saveUninitialized: false, 
     cookie : {
-        expires: Date.now() + 7*24*60*60*1000,
+        expires: new Date(Date.now() + 7*24*60*60*1000),
         maxAge: 7*24*60*60*1000,
-        httpOnly: true
+        httpOnly: true,
     }
 };
 
@@ -81,9 +81,6 @@ app.use((req,res,next) => {
     next();
 });
 
-app.get("/", (req, res) => {
-    res.redirect("/listings");
-});
 
 //For_all_listings_routes
 app.use("/listings", listingRouter);
@@ -102,6 +99,6 @@ app.use((err,req,res,next) => {
     res.status(statusCode).render("error.ejs",{message});
 })
 
-app.listen(8080, () =>{
-    console.log("Server is listening to port 8080!!");
+app.listen(8000, () =>{
+    console.log("Server is listening to port 8000!!");
 });
